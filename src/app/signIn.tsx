@@ -1,95 +1,124 @@
-import React from "react";
+import React, { useState, useEffect, FormEvent, useCallback } from "react";
 import { useNavigate } from "react-router";
 import { useAppDispatch, useAppSelector } from "../store/store";
-import {
-	loginFailure,
-	loginStart,
-	loginSuccess,
-} from "../store/slices/authSlice";
+import { loginFailure, loginStart, loginSuccess } from "../store/slices/authSlice";
+import ThemeToggle from "../components/UI/ThemeToggle";
+import { PrimaryButton } from "../components/UI/PrimaryButton";
+import { InputLabel } from "../components/UI/InputLabel";
+import { Input } from "../components/UI/Input";
+import { InputError } from "../components/UI/InputError";
+import { useValidateEmail } from "../hooks/useValidateEmail";
+import { ErrorMessages } from "../interfaces";
 
-const SignInPage: any = () => {
-	const navigate: any = useNavigate();
-	const dispatch: any = useAppDispatch();
-	const isAuthenticated: any = useAppSelector(
-		(state: any) => state.auth.isAuthenticated,
-	);
+const SignInPage: React.FC = () => {
+	const navigate = useNavigate();
+  	const dispatch = useAppDispatch();
+  	const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  	const errors = useAppSelector((state) => state.auth.errors);
+  	const loading = useAppSelector((state) => state.auth.loading);
 
-	const [email, setEmail]: any = React.useState("");
-	const [password, setPassword]: any = React.useState("");
+  	const [email, setEmail] = useState<string>("");
+  	const [password, setPassword] = useState<string>("");
 
-	React.useEffect(() => {
-		if (isAuthenticated === true) navigate("/");
+	useEffect(() => {
+		if (isAuthenticated) {
+			navigate("/");
+		}
 	}, [isAuthenticated, navigate]);
 
-	async function handleSubmit(e: any) {
+	const validateForm = useCallback((): ErrorMessages => {
+		const newErrors: ErrorMessages = {};
+		if (!email.trim()) newErrors.email = "Email is required";
+		else if (!useValidateEmail(email)) newErrors.email = "Invalid email format";
+
+		if (!password.trim()) newErrors.password = "Password is required";
+		else if (password.length < 4) newErrors.password = "Password must be at least 4 characters long";
+
+		return newErrors;
+	}, [email, password]);
+
+  	const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
 		e.preventDefault();
+		dispatch(loginFailure({}));
+
+		const formErrors = validateForm();
+		if (Object.keys(formErrors).length > 0) {
+			dispatch(loginFailure(formErrors)); 
+			return;
+		}
+
 		dispatch(loginStart());
+		await new Promise((resolve) => setTimeout(resolve, 1000));
 
-		await new Promise((r) => setTimeout(r, 1000));
+		if (email.trim() === "test@test.test" && password === "password") {
+			const userData = {
+				email: email.trim(),
+				name: email.split("@")[0],
+				id: Math.random(),
+				role: "user",
+			};
+			dispatch(loginSuccess(userData));
+		} else {
+			dispatch(loginFailure({ general: "User not found" }));
+		}
+	};
 
-		if (email && password) {
-			dispatch(
-				loginSuccess({
-					email: email,
-					name: email.split("@")[0],
-					id: Math.random(),
-					role: "user",
-				}),
-			);
-		} else dispatch(loginFailure("Please fill all fields"));
-	}
+  	return (
+		<div className="bg-gray-50 dark:bg-black">
+			<div className="flex justify-end pt-4 pr-4">
+				<ThemeToggle />
+			</div>
 
-	return (
-		<div className="h-screen flex items-center justify-center bg-gray-50">
-			<div className="w-full max-w-md">
-				<div className="bg-white shadow-md rounded-xl p-8">
-					<h1 className="text-2xl font-bold text-gray-800 text-center mb-6">
-						Sign In
-					</h1>
+			<div className="h-screen flex items-center justify-center">
+				<div className="w-full max-w-md">
+					<div className="bg-white dark:bg-gray-800 shadow-md rounded-xl p-8">
+						<h1 className="text-2xl font-bold text-gray-800 text-center mb-6 dark:text-white">Sign In</h1>
 
-					<form onSubmit={handleSubmit}>
-						<div className="mb-4">
-							<label htmlFor="email" className="block text-sm font-medium mb-2">
-								Email address
-							</label>
-							<input
-								type="email"
-								id="email"
-								name="email"
-								className="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500"
-								required
-								value={email}
-								onChange={(e) => setEmail(e.target.value)}
-							/>
-						</div>
+						<form onSubmit={handleSubmit}>
+							<div className="mb-4">
+								<InputLabel htmlFor="email" text="Email address" />
+								<Input
+									type="text"
+									id="email"
+									name="email"
+									value={email}
+									onChange={(e) => setEmail(e.target.value)}
+									loading={loading}
+								/>
+								<InputError error={errors?.email} />
+							</div>
 
-						<div className="mb-6">
-							<label
-								htmlFor="password"
-								className="block text-sm font-medium mb-2">
-								Password
-							</label>
-							<input
+							<div className="mb-6">
+								<InputLabel htmlFor="password" text="Password" />
+								<Input
 								type="password"
 								id="password"
 								name="password"
-								className="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500"
-								required
 								value={password}
 								onChange={(e) => setPassword(e.target.value)}
-							/>
-						</div>
+								loading={loading}
+								/>
+								<InputError error={errors?.password} />
+							</div>
 
-						<button
-							type="submit"
-							className="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
-							Sign in
-						</button>
-					</form>
+							<div className="mb-2">
+								<InputError error={errors?.general} />
+							</div>
+
+							<PrimaryButton text="Sign in" loading={loading} />
+						</form>
+					</div>
 				</div>
 			</div>
 		</div>
-	);
+  	);
 };
 
 export default SignInPage;
+
+
+
+
+
+
+

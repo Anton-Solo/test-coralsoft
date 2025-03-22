@@ -10,7 +10,7 @@ const customMiddleware = (store: any) => (next: any) => (action: any) => {
 
 const store = configureStore({
 	reducer: {
-		cats: catsApi.reducer,
+		cats: catsApi?.reducer,
 		auth: authReducer,
 		[catsApi.reducerPath]: catsApi.reducer,
 	},
