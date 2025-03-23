@@ -64,12 +64,12 @@ const SignInPage: React.FC = () => {
 	};
 
   	return (
-		<div className="bg-gray-50 dark:bg-black">
+		<div className="h-screen bg-gray-50 dark:bg-black">
 			<div className="flex justify-end pt-4 pr-4">
 				<ThemeToggle />
 			</div>
 
-			<div className="h-screen flex items-center justify-center">
+			<div className="h-[93vh] flex items-center justify-center">
 				<div className="w-full max-w-md">
 					<div className="bg-white dark:bg-gray-800 shadow-md rounded-xl p-8">
 						<h1 className="text-2xl font-bold text-gray-800 text-center mb-6 dark:text-white">Sign In</h1>

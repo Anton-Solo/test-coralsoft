@@ -4,11 +4,11 @@ import { CatModel } from "../interfaces";
 export const catsApi = createApi({
 	reducerPath: "catsApi",
 	baseQuery: fetchBaseQuery({
-		baseUrl: "https://api.thecatapi.com/v1",
+		baseUrl: import.meta.env.VITE_CAT_API_BASE_URL,
 	}),
 	endpoints: (builder) => ({
 		getBreeds: builder.query<CatModel[], void>({
-			query: () => "/breeds?limit=10",
+			query: () => "/breeds?limit=12",
 		}),
 	}),
 });

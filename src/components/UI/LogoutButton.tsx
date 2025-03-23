@@ -7,6 +7,7 @@ const LogoutButton = () => {
 
 	const handleLogout = () => {
 		dispatch(logout());
+		window.location.reload();
 	};
 
 	return (

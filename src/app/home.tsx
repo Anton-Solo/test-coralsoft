@@ -12,11 +12,14 @@ import { CatsGrid } from "../components/CatsGrid/index.tsx";
 import ThemeToggle from "../components/UI/ThemeToggle.tsx";
 import LogoutButton from "../components/UI/LogoutButton.tsx";
 import { CatModel } from "../interfaces/index.ts";
+import useSortedFilteredCats from "../hooks/useSortedFIlteredCats.tsx";
+import { Select } from "../components/UI/Select.tsx";
 
 const HomePage: React.FC = () => {
 	const navigate = useNavigate();
 	const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
 	const { data: cats, error, isLoading } = useGetBreedsQuery();
+	const { filteredCats, sortOption, setSortOption, originFilter, setOriginFilter, uniqueOrigins } = useSortedFilteredCats(cats);
 
 	const [adaptabilityData, setAdaptabilityData] = useState<{ name: string; value: number }[]>([]);
 	const [affectionData, setAffectionData] = useState<{ name: string; value: number }[]>([]);
@@ -151,8 +154,30 @@ const HomePage: React.FC = () => {
 				<LifeSpan lifeSpanData={lifeSpanData} />
 			</div>
 
+			{/* Sorting and Filtering Controls */}
+			<div className="flex gap-4 my-6">
+				<Select
+					value={sortOption}
+					onChange={setSortOption}
+					options={[
+						{ value: "name", label: "Sort by Name" },
+						{ value: "adaptability", label: "Sort by Adaptability" },
+						{ value: "affection_level", label: "Sort by Affection Level" }
+					]}
+				/>
+
+				<Select
+					value={originFilter}
+					onChange={setOriginFilter}
+					options={[
+						{ value: "", label: "Filter by Origin" },
+						...uniqueOrigins.map(origin => ({ value: origin, label: origin }))
+					]}
+				/>
+			</div>
+
 			<div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-				<CatsGrid cats={cats || []}/>
+				<CatsGrid cats={filteredCats || []}/>
 			</div>
 		</div>
 	);
