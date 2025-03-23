@@ -3,7 +3,7 @@ import { catsApi } from "../services/catsService";
 import authReducer from "./slices/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 
-const customMiddleware = (store: any) => (next: any) => (action: any) => {
+const customMiddleware = () => (next: any) => (action: any) => {
 	const result = next(action);
 	return result;
 };
@@ -21,7 +21,7 @@ const store = configureStore({
 });
 
 export type RootState = ReturnType<any>;
-type AppDispatch = typeof store.dispatch;
+export type AppDispatch = typeof store.dispatch;
 
 export const useAppDispatch = () => useDispatch();
 export const useAppSelector = <T extends any>(selector: (state: any) => T) =>
