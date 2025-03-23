@@ -1,5 +1,4 @@
 import { ButtonHTMLAttributes } from "react";
-import spinner from "../../images/spinner.gif";
 
 interface IButton extends ButtonHTMLAttributes<HTMLButtonElement> {
     loading?: boolean;
